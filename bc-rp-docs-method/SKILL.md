@@ -36,6 +36,9 @@ Every domain must be divided into three distinct phases:
 ## Guidelines for the Tech Lead
 
 - **Traceability**: Every Design element must map back to an Analysis flow, which must map back to a Requirement.
+- **Architectural Coupling**:
+    - **Core Domain**: Must host all shared utilities, cross-cutting helpers, and engine-level base classes (e.g., Database wrapper, Network base, Utility math).
+    - **Functional Domains**: Must host strictly specific business logic (e.g., Mana calculation in Magic, Durability in Inventory). Do NOT duplicate utility code here.
 - **Brevity**: Use tables and Markdown lists instead of long paragraphs.
 - **Sandbox Context**: Always keep Sandbox engine limitations and features in mind during the Design phase.
 
