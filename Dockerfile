@@ -15,6 +15,6 @@ FROM nginx:stable-alpine
 COPY --from=builder /app/docs /usr/share/nginx/html
 
 # Configuration Nginx de base pour éviter les problèmes de cache
-EXPOSE 80
+EXPOSE 3000
 
 CMD ["nginx", "-g", "daemon off;"]
