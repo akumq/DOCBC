@@ -1,0 +1,27 @@
+classDiagram
+    class Characters {
+        +int id PK
+        +int player_id FK
+        +string name
+        +int size
+        +int level
+        +int exp
+    }
+
+    class Apparences {
+        +int id PK
+        +int character_id FK
+        +string hair_color
+        +string eye_color
+        +string skin_color
+    }
+
+    class Stats {
+        +int character_id PK, FK
+        +int strength
+        +int intelligence
+        +int dexterity
+    }
+
+    Characters "1" -- "1" Apparences : defines
+    Characters "1" -- "1" Stats : has

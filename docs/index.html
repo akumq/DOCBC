@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architect | Tech Docs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+        window.mermaid = mermaid;
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .sidebar-item.active { @apply bg-blue-600 text-white shadow-lg border-blue-400; }
+        .folder-header { @apply flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] px-3 py-6 mt-4 border-t border-gray-800/50; }
+        .folder-header:first-child { @apply border-t-0 mt-0; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { @apply bg-[#0d1117]; }
+        ::-webkit-scrollbar-thumb { @apply bg-gray-700 rounded-full; }
+    </style>
+</head>
+<body class="bg-[#0d1117] text-gray-200 flex h-screen overflow-hidden">
+    <aside class="w-72 bg-[#161b22] border-r border-gray-800 flex flex-col shadow-2xl z-10">
+        <div class="p-6 border-b border-gray-800 bg-[#0d1117]/80 backdrop-blur-md">
+            <h1 class="text-lg font-black text-white flex items-center gap-3">
+                <span class="bg-blue-600 p-1.5 rounded-lg shadow-inline">💠</span>
+                <span class="tracking-tighter">TECH DOCS</span>
+            </h1>
+            <p class="text-[10px] text-gray-500 mt-2 uppercase font-bold tracking-widest flex items-center gap-2">
+                <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                System Architect
+            </p>
+        </div>
+        <nav class="flex-1 overflow-y-auto p-4 space-y-1" id="file-list"></nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden bg-[#0d1117]">
+        <header class="h-14 bg-[#161b22]/50 border-b border-gray-800 flex items-center px-8 justify-between backdrop-blur-sm">
+            <div id="breadcrumb" class="text-[11px] text-gray-500 font-mono uppercase tracking-widest flex items-center gap-2"></div>
+        </header>
+
+        <section id="content-area" class="flex-1 overflow-y-auto p-12 lg:p-20 scroll-smooth">
+            <div id="welcome-screen" class="max-w-3xl mx-auto text-center py-20">
+                <div class="w-20 h-20 bg-blue-600/10 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-blue-500/20 shadow-xl text-3xl">📜</div>
+                <h2 class="text-3xl font-black text-white mb-4 tracking-tight">Technical Repository</h2>
+                <p class="text-gray-400 leading-relaxed">Select a module to visualize architecture and requirements.</p>
+            </div>
+            
+            <div id="file-viewer" class="hidden max-w-5xl mx-auto">
+                <div id="mermaid-container" class="hidden mb-16 shadow-2xl border border-gray-800 rounded-xl overflow-hidden">
+                    <div class="bg-[#161b22] px-4 py-2 border-b border-gray-800 flex justify-between items-center text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                        <span>Visual Analysis Diagram</span>
+                        <div class="flex gap-1"><div class="w-1.5 h-1.5 rounded-full bg-red-500/30"></div><div class="w-1.5 h-1.5 rounded-full bg-yellow-500/30"></div><div class="w-1.5 h-1.5 rounded-full bg-green-500/30"></div></div>
+                    </div>
+                    <div class="mermaid" id="mermaid-graph"></div>
+                </div>
+                <div id="rendered-md" class="markdown-body mb-20"></div>
+                <div id="raw-code-section" class="mt-20 pt-10 border-t border-gray-800/50">
+                    <pre class="rounded-xl !bg-[#010409] border border-gray-800 p-6 overflow-auto text-sm"><code id="code-block"></code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const files = [{"path":"00_Database_Core/02_Analysis/Class_DatabaseSchema.mmd","content":"classDiagram\n    class Players {\n        +int id PK\n        +string steamid64 Unique\n        +int reroll\n    }\n    note for Players \"Table racine liant le compte Steam\\nà l'ensemble des systèmes.\"\n","type":"mermaid"},{"path":"01_Player_Account/02_Analysis/Class_AccountEconomy.mmd","content":"classDiagram\n    class Gacha_Pulls {\n        +int id PK\n        +int player_id FK\n        +int slot\n        +string type\n        +int value\n        +timestamp pulled_at\n    }\n\n    class Pity_System {\n        +int player_id PK, FK\n        +int current_pity\n        +int total_pulls\n    }\n\n    class Premium_Status {\n        +int player_id PK, FK\n        +timestamp expires_at\n        +int shop_points\n        +string creator_code\n    }\n\n    Gacha_Pulls \"0..*\" --o \"1\" Pity_System : updates\n    Pity_System \"1\" -- \"1\" Premium_Status : shared account context\n","type":"mermaid"},{"path":"01_Player_Account/README.md","content":"# 01. Player Identity & Account\n\nCe domaine gère les données persistantes liées au compte global du joueur (SteamID) et à son expérience utilisateur hors-RP.\n\n## Périmètre\n- **Monétisation** : Points boutique et système de Pity (18), système Premium (boosts XP, points horaires) (22).\n- **Engagement** : Heure de jeu totale et dernière connexion (24), Battle Pass et récompenses journalières (25).\n- **Affiliation** : Système de codes créateurs et récompenses associées (23).\n- **UX/UI** : Sauvegarde des configurations de caméra et personnalisation du HUD (26).\n","type":"md"},{"path":"02_Character/README.md","content":"# 02. Character & Progression\n\nGestion de l'évolution intrinsèque du personnage, de ses capacités et de son identité physique.\n\n## Périmètre\n- **Identité Visuelle** : Personnalisation complète (prénom, nom, taille, coiffure, peau) (11).\n- **Statistiques** : Niveau du personnage et attributs (STR, INT, etc.) (6).\n- **Capacités** : Arbre de talents débloqués (7), Classes et postures de combat (Tank, DPS, Heal) (13).\n- **Artisanat & Récolte** : Niveaux de métiers, progression et recettes apprises (17).\n- **Développement** : Système d'entraînement et temps de recharge (28).\n","type":"md"},{"path":"02_Character_Progression/02_Analysis/Class_CharacterIdentity.mmd","content":"classDiagram\n    class Characters {\n        +int id PK\n        +int player_id FK\n        +string name\n        +int size\n        +int level\n        +int exp\n    }\n\n    class Apparences {\n        +int id PK\n        +int character_id FK\n        +string hair_color\n        +string eye_color\n        +string skin_color\n    }\n\n    class Stats {\n        +int character_id PK, FK\n        +int strength\n        +int intelligence\n        +int dexterity\n    }\n\n    Characters \"1\" -- \"1\" Apparences : defines\n    Characters \"1\" -- \"1\" Stats : has\n","type":"mermaid"},{"path":"03_Magic_Combat/README.md","content":"# 03. Magic & Combat Mechanics\n\nModélisation technique des systèmes de combat actifs et des ressources d'énergie.\n\n## Périmètre\n- **Ressources** : Gestion du Mana (2) et de la Stamina (sauts, dashs) (3).\n- **Grimoire** : Système de trèfles et lien avec la magie (9).\n- **Action** : Roue des animations favorites (14), barre de sorts et favoris (15).\n- **Effets** : Gestion des Buffs et consommables (durée, intensité) (20).\n- **Événements** : Système de Capture the Flag (CTF) (34).\n","type":"md"},{"path":"04_Inventory_Economy/README.md","content":"# 04. Inventory & Economy\n\nArchitecture de stockage des objets et flux financiers du serveur.\n\n## Périmètre\n- **Stockage** : Système d'inventaire complet (durabilité, position, favoris) (5).\n- **Finance** : Gestion de l'argent (Yul/Or) (8).\n- **Production** : Système de crafting d'objets (16).\n- **Commerce** : Hôtel de vente (21).\n- **Stockage partagé** : Banques personnelles, de guilde et de royaume (27).\n","type":"md"},{"path":"05_World_Interaction/README.md","content":"# 05. World & Interaction\n\nPersistance de l'état du monde et interactions sociales entre les joueurs.\n\n## Périmètre\n- **Social** : Historique des rencontres entre joueurs (1), système de missives (boîte de réception) (33).\n- **Persistance** : Position du joueur sauvegardée (4), marqueurs de carte (waypoints) stockés (32).\n- **Immobilier** : Système de propriétés (29), Auberges déblocables (points de respawn) (31).\n","type":"md"},{"path":"06_Quests_Narrative/README.md","content":"# 06. Quests & Narrative\n\nMoteur de narration et gestionnaire de contenu PVE.\n\n## Périmètre\n- **Progression** : Suivi des quêtes (faites, disponibles, temps de recharge) (12).\n- **Entités** : Gestionnaire de quêtes (Quest Manager) et dialogues PNJ (35).\n","type":"md"},{"path":"07_Social_Structures/02_Analysis/Class_SocialEntities.mmd","content":"classDiagram\n    class Guilds {\n        +int id PK\n        +string name Unique\n    }\n\n    class Guild_Members {\n        +int id PK\n        +int guild_id FK\n        +int character_id FK\n        +string role\n        +timestamp joined_at\n    }\n\n    class Territoires {\n        +int id PK\n        +string name\n        +int guild_id FK\n    }\n\n    class Squads {\n        +int id PK\n        +int creator_id FK\n        +string status\n    }\n\n    Guilds \"1\" --o \"0..*\" Guild_Members : contains\n    Guilds \"1\" --o \"0..*\" Territoires : controls\n    Guild_Members \"0..*\" --o \"0..1\" Squads : party context\n","type":"mermaid"},{"path":"07_Social_Structures/README.md","content":"# 07. Social & Structures\n\nGestion des groupes organisés et des hiérarchies politiques.\n\n## Périmètre\n- **Hiérarchie** : Factions et grades associés (10).\n- **Groupes** : Système de Clans (19), Système de Squad (gestion présence/déconnexion) (30).\n","type":"md"},{"path":"08_Logging_Auditing/README.md","content":"# 08. Logging & Auditing\n\nTraçabilité exhaustive des actions serveurs pour l'administration.\n\n## Périmètre\n- **Communication** : Logs de discussion (local, groupe, global, /me) (36).\n- **Échanges** : Logs de trade (qui donne quoi) et logs de drop (36).\n- **Combat** : Logs PvP détaillés (historique des dégâts, horodatage) (36).\n","type":"md"},{"path":"README.md","content":"# Black Clover RP - Sandbox Documentation\n\nThis project contains the complete technical and functional documentation for the Black Clover RP server on Sandbox.\n\n## Documentation Methodology (Visual Paradigm - Standard SDLC)\n\nEach domain is organized as follows:\n1. **01_Requirements**: Functional requirements, User Stories, and Use Cases.\n2. **02_Analysis**: System behavior, State machines, and Sequence flows.\n3. **03_Design**: Data schemas, API/Function definitions, and Component architecture.\n\n## Domains\n\n### 01. Core Engine & Systems\n*   **Mana/Grimoire Mechanics**: Mana regeneration, Grimoire binding, Attribute generation.\n*   **Player Attributes**: Physical stats, Magic stats, Affinity.\n\n### 02. Magic & Combat\n*   **Spells**: Mana cost, Cooldowns, Scaling.\n*   **Elemental Interactions**: Fire > Wind, etc.\n*   **Combat States**: Knockback, Stun, Magic Shield.\n\n### 03. Progression & Economy\n*   **Ranking**: Magic Knight exams, Promotions, Yul (Currency).\n*   **Grimoires**: Tier systems, Rarity, Progression.\n\n### 04. World & Environment\n*   **Map Zones**: Forsaken, Common, Noble, Royal Realm.\n*   **NPC & Questing**: Magic Knight captains, Dungeon rewards.\n\n### 05. UI & UX\n*   **HUD**: Mana bar, HP, Active spell.\n*   **Menus**: Grimoire interface, Character stats.\n\n---\n*Created by the Tech Lead for the BC RP Project.*\n","type":"md"},{"path":"SYSTEM_DOMAINS.md","content":"# Cartographie des Domaines Techniques - RP Documentation\n\nCe document définit la répartition des 36 points fonctionnels en domaines techniques cohérents pour la modélisation Requirements/Analysis/Design.\n\n## 01. Player Identity & Account\n*Gestion du joueur au-delà du personnage RP.*\n- **Points inclus** : 18 (Boutique/Pity), 22 (Premium/Don), 23 (Code créateur), 24 (Heures de jeu/Connexion), 25 (Battle Pass/Daily), 26 (Config HUD/Caméra).\n- **Objectif** : Centraliser les données liées au compte Steam, à la monétisation et aux préférences utilisateur.\n\n## 02. Character & Progression\n*L'évolution statistique et visuelle de l'avatar.*\n- **Points inclus** : 6 (Niveaux/Stats), 7 (Talents), 11 (Personnalisation visuelle), 13 (Classes/Postures), 17 (Métiers/Recettes), 28 (Entraînement/CD).\n- **Objectif** : Gérer l'état du personnage, ses capacités passives et sa progression métier.\n\n## 03. Magic & Combat Mechanics\n*Le cœur de gameplay actif.*\n- **Points inclus** : 2 (Mana), 3 (Stamina/Dash), 9 (Grimoire/Trèfles), 14 (Animations), 15 (Barre de Spell), 20 (Buffs/Consommables), 34 (Système CTF).\n- **Objectif** : Modéliser les flux d'énergie (Mana/Stamina) et l'exécution des compétences de combat.\n\n## 04. Economy & Inventory\n*Flux de ressources et stockage.*\n- **Points inclus** : 5 (Inventaire/Durabilité/Favoris), 8 (Argent), 16 (Crafting), 21 (Hôtel de vente), 27 (Banques Perso/Guilde/Royaume).\n- **Objectif** : Gérer la persistance des objets, l'économie de marché et les différents types de stockages sécurisés.\n\n## 05. World & Interaction\n*Le personnage dans son environnement et avec les autres.*\n- **Points inclus** : 1 (Rencontres joueurs), 4 (Position), 29 (Propriétés), 31 (Auberges/Respawn), 32 (Waypoints/Marqueurs), 33 (Missives).\n- **Objectif** : Sauvegarder l'emplacement dans le monde et les interactions persistantes entre joueurs.\n\n## 06. Quests & Narrative\n*L'orchestration des objectifs.*\n- **Points inclus** : 12 (Progression quêtes/CD), 35 (Quest Manager/PNJ).\n- **Objectif** : Mettre en place un moteur de quêtes capable de gérer des états complexes et des interactions avec les PNJ.\n\n## 07. Social & Structures\n*Organisations de groupe.*\n- **Points inclus** : 10 (Factions/Grades), 19 (Clan), 30 (Squad System).\n- **Objectif** : Gérer les hiérarchies, les appartenances et le statut en ligne des membres de groupes.\n\n## 08. Logging & Auditing (Anciennement Logs)\n*Traçabilité complète.*\n- **Points inclus** : 36 (Chat logs, Trade logs, PvP logs).\n- **Objectif** : Monitoring de l'activité pour la modération et l'équilibrage.\n","type":"md"}];
+        const nav = document.getElementById('file-list');
+        const viewer = document.getElementById('file-viewer');
+        const welcome = document.getElementById('welcome-screen');
+        const mdArea = document.getElementById('rendered-md');
+        const mermaidContainer = document.getElementById('mermaid-container');
+        const mermaidGraph = document.getElementById('mermaid-graph');
+        const codeBlock = document.getElementById('code-block');
+        const breadcrumb = document.getElementById('breadcrumb');
+
+        const folders = {};
+        files.forEach(f => {
+            const parts = f.path.split('/');
+            const folderName = parts.length > 1 ? parts[0] : 'General';
+            if (!folders[folderName]) folders[folderName] = [];
+            folders[folderName].push(f);
+        });
+
+        Object.keys(folders).sort().forEach(folderName => {
+            const header = document.createElement('div');
+            header.className = 'folder-header';
+            header.innerHTML = '📂 ' + folderName.replace(/[0-9]+_/g, '').replace(/_/g, ' ');
+            nav.appendChild(header);
+
+            folders[folderName].sort((a,b) => a.path.localeCompare(b.path)).forEach(f => {
+                const btn = document.createElement('button');
+                btn.className = 'sidebar-item w-full text-left px-3 py-2 rounded-lg text-xs transition-all hover:bg-gray-800/50 flex items-center gap-3 group border border-transparent mb-1';
+                const fileName = f.path.split('/').pop().replace('.md', '').replace('.mmd', '');
+                const icon = f.type === 'mermaid' ? '<span class="text-blue-500 font-bold">DIAG</span>' : '<span class="text-gray-500 font-bold">DOCS</span>';
+                btn.innerHTML = icon + ' <span class="truncate font-medium text-gray-400 group-hover:text-gray-200">' + fileName.replace(/_/g, ' ') + '</span>';
+                btn.onclick = () => loadFile(f, btn);
+                nav.appendChild(btn);
+            });
+        });
+
+        async function loadFile(file, element) {
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            welcome.classList.add('hidden');
+            viewer.classList.remove('hidden');
+            breadcrumb.textContent = 'Docs / ' + file.path.replace(/_/g, ' ').replace('.md', '').replace('.mmd', '');
+
+            if (file.type === 'mermaid') {
+                mermaidContainer.classList.remove('hidden');
+                mermaidGraph.removeAttribute('data-processed');
+                mermaidGraph.innerHTML = file.content;
+                mdArea.innerHTML = '';
+                codeBlock.className = 'language-mermaid';
+                if (window.mermaid) { await window.mermaid.run({ nodes: [mermaidGraph] }); }
+            } else {
+                mermaidContainer.classList.add('hidden');
+                mdArea.innerHTML = marked.parse(file.content);
+                codeBlock.className = 'language-markdown';
+            }
+            codeBlock.textContent = file.content;
+            Prism.highlightElement(codeBlock);
+            viewer.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

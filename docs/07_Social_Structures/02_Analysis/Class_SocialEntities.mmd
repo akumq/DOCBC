@@ -1,0 +1,29 @@
+classDiagram
+    class Guilds {
+        +int id PK
+        +string name Unique
+    }
+
+    class Guild_Members {
+        +int id PK
+        +int guild_id FK
+        +int character_id FK
+        +string role
+        +timestamp joined_at
+    }
+
+    class Territoires {
+        +int id PK
+        +string name
+        +int guild_id FK
+    }
+
+    class Squads {
+        +int id PK
+        +int creator_id FK
+        +string status
+    }
+
+    Guilds "1" --o "0..*" Guild_Members : contains
+    Guilds "1" --o "0..*" Territoires : controls
+    Guild_Members "0..*" --o "0..1" Squads : party context

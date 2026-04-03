@@ -1,0 +1,25 @@
+classDiagram
+    class Gacha_Pulls {
+        +int id PK
+        +int player_id FK
+        +int slot
+        +string type
+        +int value
+        +timestamp pulled_at
+    }
+
+    class Pity_System {
+        +int player_id PK, FK
+        +int current_pity
+        +int total_pulls
+    }
+
+    class Premium_Status {
+        +int player_id PK, FK
+        +timestamp expires_at
+        +int shop_points
+        +string creator_code
+    }
+
+    Gacha_Pulls "0..*" --o "1" Pity_System : updates
+    Pity_System "1" -- "1" Premium_Status : shared account context
